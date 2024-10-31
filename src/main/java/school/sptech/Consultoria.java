@@ -20,6 +20,22 @@ public class Consultoria {
     this.desenvolvedores = new ArrayList<Desenvolvedor>();
   }
 
+  public String getNome() {
+    return nome;
+  }
+
+  public void setNome(String nome) {
+    this.nome = nome;
+  }
+
+  public Integer getVagas() {
+    return vagas;
+  }
+
+  public void setVagas(Integer vagas) {
+    this.vagas = vagas;
+  }
+
   public Boolean contratar(Desenvolvedor desenvolvedor) {
     if (vagas > desenvolvedores.size()) {
       desenvolvedores.add(desenvolvedor);
@@ -36,7 +52,7 @@ public class Consultoria {
     return false;
   }
 
-  public Double getTotalSalario() {
+  public Double getTotalSalarios() {
     return desenvolvedores.stream().map(Desenvolvedor::calcularSalario).reduce(Double::sum).orElse(0.0);
   }
 
@@ -50,5 +66,38 @@ public class Consultoria {
 
   public Desenvolvedor buscarMenorSalario() {
     return desenvolvedores.stream().reduce((menorSalario, desenvolvedor) -> desenvolvedor.calcularSalario() < menorSalario.calcularSalario() ? desenvolvedor : menorSalario).orElse(null);
+  }
+
+  public List<Desenvolvedor> buscarPorTecnologia(String tecnologia) {
+    return desenvolvedores.stream().filter(desenvolvedor -> {
+      if (desenvolvedor instanceof DesenvolvedorMobile) {
+        DesenvolvedorMobile desenvolvedorMobile = (DesenvolvedorMobile) desenvolvedor;
+        if (
+          desenvolvedorMobile.getPlataforma() != null
+          && desenvolvedorMobile.getPlataforma().contains(tecnologia)
+          || desenvolvedorMobile.getLinguagem() != null
+          && desenvolvedorMobile.getLinguagem().contains(tecnologia)
+        ) {
+          return true;
+        }
+      } else if (desenvolvedor instanceof DesenvolvedorWeb) {
+        DesenvolvedorWeb desenvolvedorWeb = (DesenvolvedorWeb) desenvolvedor;
+        if (
+          desenvolvedorWeb.getBackend() != null
+          && desenvolvedorWeb.getBackend().contains(tecnologia)
+          || desenvolvedorWeb.getFrontend() != null
+          && desenvolvedorWeb.getFrontend().contains(tecnologia)
+          || desenvolvedorWeb.getSgbd() != null
+          && desenvolvedorWeb.getSgbd().contains(tecnologia)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }).toList();
+  }
+
+  public Double getTotalSalariosPorTecnologia(String tecnologia) {
+    return buscarPorTecnologia(tecnologia).stream().map(Desenvolvedor::calcularSalario).reduce(Double::sum).orElse(0.0);
   }
 }
